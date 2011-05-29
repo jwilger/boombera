@@ -1,2 +1,8 @@
 #!/usr/bin/env ruby
+$:.unshift(File.expand_path(File.join(File.dirname(__FILE__), '..', 'lib')))
+require 'boombera'
+
+command, database, path, body = ARGV[0..3]
+db = CouchRest.database!("http://127.0.0.1:5984/#{database}")
+db.save_doc({:path => path, :body => body})
 puts "Content Created: /foo"

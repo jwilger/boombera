@@ -22,8 +22,11 @@ describe "The boombera CLI" do
 
       it 'stores the content in the couchdb server' do
         db = CouchRest.database!('http://127.0.0.1:5984/boombera_test')
-        result = db.view('boombera/content', :key => '/foo').rows.first
-        result.body.should == "some content"
+        result = db.documents['rows'].first
+        result.should_not be_nil
+        document = db.get(result['id'])
+        document['path'].should == '/foo'
+        document['body'].should == 'some content'
       end
     end
   end
