@@ -18,7 +18,7 @@ Jeweler::Tasks.new do |gem|
   gem.homepage = "http://github.com/jwilger/boombera"
   gem.license = "MIT"
   gem.summary = %Q{CouchDB-backed content repository for multi-tenant, multi-stage applications}
-  gem.description = %Q{TODO: longer description of your gem}
+  gem.description = gem.summary
   gem.email = "johnwilger@gmail.com"
   gem.authors = ["John Wilger"]
   # dependencies defined in Gemfile
