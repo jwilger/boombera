@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["John Wilger"]
   s.date = %q{2011-05-28}
-  s.description = %q{TODO: longer description of your gem}
+  s.description = %q{CouchDB-backed content repository for multi-tenant, multi-stage applications}
   s.email = %q{johnwilger@gmail.com}
   s.extra_rdoc_files = [
     "LICENSE.txt",
@@ -26,6 +26,7 @@ Gem::Specification.new do |s|
     "README.rdoc",
     "Rakefile",
     "VERSION",
+    "boombera.gemspec",
     "lib/boombera.rb",
     "spec/spec_helper.rb"
   ]
