@@ -10,8 +10,14 @@ GIT
 GEM
   remote: http://rubygems.org/
   specs:
+    couchrest (1.0.2)
+      json (~> 1.5.1)
+      mime-types (~> 1.15)
+      rest-client (~> 1.6.1)
     diff-lcs (1.1.2)
     git (1.2.5)
+    json (1.5.1)
+    mime-types (1.16)
     rake (0.9.0)
     rcov (0.9.9)
     rdoc (3.6.1)
@@ -19,6 +25,8 @@ GEM
       ruby2ruby (~> 1.2)
       ruby_parser (~> 2.0)
       sexp_processor (~> 3.0)
+    rest-client (1.6.1)
+      mime-types (>= 1.16)
     rspec (2.3.0)
       rspec-core (~> 2.3.0)
       rspec-expectations (~> 2.3.0)
@@ -39,6 +47,7 @@ PLATFORMS
 
 DEPENDENCIES
   bundler (~> 1.0.0)
+  couchrest (~> 1.0.2)
   jeweler!
   rcov
   rdoc (~> 3.6.1)
