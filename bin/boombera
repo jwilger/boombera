@@ -2,20 +2,26 @@
 $:.unshift(File.expand_path(File.join(File.dirname(__FILE__), '..', 'lib')))
 require 'boombera'
 
-database, path, body = ARGV[1..3]
+command, database, path, body = ARGV[0..3]
 
-begin
-  db = Boombera.new(database)
-  result = db.put(path, body)
-  case result.status
-  when :created
-    puts "Content Created: #{path}"
-  when :updated
-    puts "Content Updated: #{path}"
+case command
+when 'install'
+  Boombera.install_design_doc!(database)
+  puts "The CouchDB Boombera application has been updated to version #{Boombera.version}"
+when 'put'
+  begin
+    db = Boombera.new(database)
+    result = db.put(path, body)
+    case result.status
+    when :created
+      puts "Content Created: #{path}"
+    when :updated
+      puts "Content Updated: #{path}"
+    end
+  rescue Boombera::VersionMismatch => e
+    puts e.message
+    puts "You may need to run 'boombera install #{database}' to update the"
+    puts "CouchDB Boombera application."
+    exit(1)
   end
-rescue Boombera::VersionMismatch => e
-  puts e.message
-  puts "You may need to run 'boombera install #{database}' to update the"
-  puts "CouchDB Boombera application."
-  exit(1)
 end

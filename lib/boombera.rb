@@ -7,13 +7,37 @@ class Boombera
 
   class << self
     def version
-      @version ||= File.read(File.expand_path(File.join(File.dirname(__FILE__), '..', 'VERSION')))
+      File.read(File.expand_path(File.join(File.dirname(__FILE__), '..', 'VERSION')))
     end
 
     def database_version(db)
       db.get('_design/boombera')['gem_version']
     rescue RestClient::ResourceNotFound
       nil
+    end
+
+    def install_design_doc!(database)
+      db = CouchRest.database!(database)
+      db.save_doc(generate_design_doc)
+    end
+
+    def generate_design_doc
+      {
+        '_id' => '_design/boombera',
+        'language' => 'javascript',
+        'gem_version' => version,
+        'views' => {
+          'content_map' => {
+            'map' => <<-EOF
+              function(doc) {
+                if (doc['path']) {
+                  emit(doc.path, doc.path);
+                }
+              }
+              EOF
+          }
+        }
+      }
     end
   end
 

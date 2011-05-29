@@ -3,11 +3,11 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', 'spec_helper'))
 describe "The boombera CLI" do
   BOOMBERA_CLI = File.join(File.dirname(__FILE__), '..', '..', 'bin', 'boombera')
 
-  let(:db) { CouchRest.database!('http://127.0.0.1:5984/boombera_test') }
+  let(:db) { CouchRest.database!('boombera_test') }
 
   before(:each) do
     db.delete!
-    db.create!
+    Boombera.install_design_doc!('boombera_test')
   end
 
   describe "put command" do
@@ -59,6 +59,30 @@ describe "The boombera CLI" do
         document['path'].should == '/bar'
         document['body'].should == 'new content'
       end
+    end
+  end
+
+  describe "install command" do
+    before(:each) do
+      db.delete!
+      @output = `#{BOOMBERA_CLI} install boombera_test`
+      @exit_status = $?.exitstatus
+    end
+
+    it 'exits with a status code of 0' do
+      @exit_status.should == 0
+    end
+
+    it 'outputs a message indicating that the CouchDB portion of the Boombera application was installed' do
+      @output.should == "The CouchDB Boombera application has been updated to " \
+        + "version #{Boombera.version}\n"
+    end
+
+    it 'installs the boombera design document on the CouchDB instance' do
+      design_doc = db.get('_design/boombera')
+      expected = Boombera.generate_design_doc
+      design_doc['gem_version'].should == expected['gem_version']
+      design_doc['views'].should == expected['views']
     end
   end
 end

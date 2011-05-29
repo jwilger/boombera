@@ -39,6 +39,20 @@ describe Boombera do
       boombera.put('/foo', 'bar').should == :the_result
     end
   end
+
+  describe '.install_design_doc!' do
+    context 'when the design doc does not yet exist' do
+      it 'creates the design doc on the specified database' do
+        Boombera.stub!(:generate_design_doc => :design_doc)
+        db = mock(CouchRest::Database)
+        db.should_receive(:save_doc).with(:design_doc)
+        CouchRest.should_receive(:database!) \
+          .with('boombera_test') \
+          .and_return(db)
+        Boombera.install_design_doc!('boombera_test')
+      end
+    end
+  end
 end
 
 # This is set up as a seperate describe block, because we obviously can't stub
