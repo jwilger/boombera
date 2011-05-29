@@ -16,10 +16,49 @@ class Boombera
         Result.new(:created)
       end
 
-      def exists?(db, path)
-        result = db.view('boombera/content_map', :key => path)
-        result['total_rows'] > 0
+      def update(db, path, body)
+        document = get(db, path)
+        document.body = body
+        document.save
       end
+
+      def exists?(db, path)
+        (content_item_id_for(db, path) || false) && true
+      end
+
+      def get(db, path)
+        doc = db.get(content_item_id_for(db, path))
+        ContentItem.new(doc)
+      end
+
+      private
+
+      def content_item_id_for(db, path)
+        rows = db.view('boombera/content_map', :key => path)['rows']
+        return nil if rows.empty?
+        rows.first['id']
+      end
+    end
+
+    def initialize(doc)
+      @doc = doc
+    end
+
+    def path
+      @doc['path']
+    end
+
+    def body
+      @doc['body']
+    end
+
+    def body=(new_body)
+      @doc['body'] = new_body
+    end
+
+    def save
+      @doc.save
+      Result.new(:updated)
     end
   end
 end

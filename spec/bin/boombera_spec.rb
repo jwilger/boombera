@@ -27,7 +27,7 @@ describe "The boombera CLI" do
       end
 
       it 'creates the content in the couchdb server' do
-        result = db.documents['rows'].first
+        result = db.view('boombera/content_map', :key => '/foo')['rows'].first
         result.should_not be_nil
         document = db.get(result['id'])
         document['path'].should == '/foo'
@@ -51,7 +51,7 @@ describe "The boombera CLI" do
       end
 
       it 'updates the content in the couchdb server' do
-        rows = db.documents['rows']
+        rows = db.view('boombera/content_map', :key => '/bar')['rows']
         rows.length.should == 1
         result = rows.first
         result.should_not be_nil
