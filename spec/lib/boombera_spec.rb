@@ -57,8 +57,8 @@ describe Boombera do
   describe '.database_version' do
     it 'returns the version of Boombera that the database expects to be working with' do
       db = mock(CouchRest::Database)
-      db.should_receive(:get).with('boombera_version') \
-        .and_return({'value' => '1.2.3'})
+      db.should_receive(:get).with('_design/boombera') \
+        .and_return({'gem_version' => '1.2.3'})
       Boombera.database_version(db).should == '1.2.3'
     end
 

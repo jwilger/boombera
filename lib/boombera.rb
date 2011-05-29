@@ -11,7 +11,7 @@ class Boombera
     end
 
     def database_version(db)
-      db.get('boombera_version')['value']
+      db.get('_design/boombera')['gem_version']
     rescue RestClient::ResourceNotFound
       nil
     end
