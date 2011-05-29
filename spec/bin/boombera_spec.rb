@@ -6,6 +6,8 @@ describe "The boombera CLI" do
   describe "put command" do
     context "when putting a new content item via argument string" do
       before(:each) do
+        db = CouchRest.database!('http://127.0.0.1:5984/boombera_test')
+        db.delete!
         @output = `#{BOOMBERA_CLI} put boombera_test /foo "some content"`
         @exit_status = $?.exitstatus
       end
