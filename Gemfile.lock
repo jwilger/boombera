@@ -10,6 +10,12 @@ GIT
 GEM
   remote: http://rubygems.org/
   specs:
+    ZenTest (4.5.0)
+    autotest (4.4.6)
+      ZenTest (>= 4.4.1)
+    autotest-fsevent (0.2.5)
+      sys-uname
+    autotest-growl (0.2.9)
     couchrest (1.0.2)
       json (~> 1.5.1)
       mime-types (~> 1.15)
@@ -41,11 +47,15 @@ GEM
     ruby_parser (2.0.6)
       sexp_processor (~> 3.0)
     sexp_processor (3.0.5)
+    sys-uname (0.8.5)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  autotest (~> 4.4.6)
+  autotest-fsevent (~> 0.2.5)
+  autotest-growl (~> 0.2.9)
   bundler (~> 1.0.0)
   couchrest (~> 1.0.2)
   jeweler!

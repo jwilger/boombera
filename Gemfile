@@ -9,4 +9,7 @@ group :development do
   gem "rcov", ">= 0"
   gem "reek", "~> 1.2.8"
   gem "rdoc", "~> 3.6.1"
+  gem 'autotest', '~> 4.4.6'
+  gem 'autotest-growl', '~> 0.2.9'
+  gem 'autotest-fsevent', '~> 0.2.5'
 end
