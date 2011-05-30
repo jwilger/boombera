@@ -1,64 +1,9 @@
 require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'spec_helper'))
 
 describe Boombera::ContentItem do
-  describe '.create_or_update' do
-    context 'when the content item does not exist yet' do
-      it 'creates the content with #create and returns the result' do
-        Boombera::ContentItem.stub!(:exists? => false)
-        Boombera::ContentItem.should_receive(:create) \
-          .with(:database, '/foo', 'bar') \
-          .and_return(:created_result)
-        result = Boombera::ContentItem.create_or_update(:database, '/foo', 'bar')
-        result.should == :created_result
-      end
-    end
-
-    context 'when the content item already exists' do
-      it 'updates the content and returns the result' do
-        Boombera::ContentItem.stub!(:exists? => true)
-        Boombera::ContentItem.should_receive(:update) \
-          .with(:database, '/foo', 'bar') \
-          .and_return(:updated_result)
-        result = Boombera::ContentItem.create_or_update(:database, '/foo', 'bar')
-        result.should == :updated_result
-      end
-    end
-  end
-
-  describe '.create' do
-    it 'saves the content to the specified database' do
-      db = mock(CouchRest::Database)
-      db.should_receive(:save_doc) \
-        .with({:path => '/foo', :body => 'bar'})
-      Boombera::ContentItem.create(db, '/foo', 'bar')
-    end
-
-    it 'returns a Result with a :created status' do
-      db = stub(CouchRest::Database).as_null_object
-      result = Boombera::ContentItem.create(db, '/foo', 'bar')
-      result.status.should == :created
-    end
-  end
-
-  describe '.update' do
-    it 'saves the content to the specified database' do
-      doc = mock(CouchRest::Document)
-      doc.should_receive(:[]=).with('body', 'bar')
-      doc.should_receive(:save)
-      db = stub(CouchRest::Database, :get => doc).as_null_object
-      Boombera::ContentItem.update(db, '/foo', 'bar')
-    end
-
-    it 'returns a Result with an :updated status' do
-      db = stub(CouchRest::Database).as_null_object
-      result = Boombera::ContentItem.update(db, '/foo', 'bar')
-      result.status.should == :updated
-    end
-  end
-
   describe '.get' do
     context 'with an existing content item' do
-      it 'returns a success Result with a ContentItem instance for the found document' do
+      it 'returns a ContentItem instance for the found document' do
         view_result = {'rows' => [{'id' => '123'}]}
         db = mock(CouchRest::Database)
         db.should_receive(:view) \
@@ -67,62 +12,52 @@ describe Boombera::ContentItem do
         db.should_receive(:get) \
           .with('123') \
           .and_return({'path' => '/foo', 'body' => 'bar'})
-        result = Boombera::ContentItem.get(db, '/foo')
-        result.status.should == :success
-        result.content_item.path.should == '/foo'
-        result.content_item.body.should == 'bar'
+        result = Boombera::ContentItem.get('/foo', db)
+        result.path.should == '/foo'
+        result.body.should == 'bar'
       end
     end
   end
 
-  describe '.exists?' do
-    it 'returns true when the database has a content item with the specified path' do
-      view_result_with_rows = {'rows' => [{'id' => '123'}]}
-      db = mock(CouchRest::Database)
-      db.should_receive(:view) \
-        .with('boombera/content_map', :key => '/foo') \
-        .and_return(view_result_with_rows)
-      Boombera::ContentItem.exists?(db, '/foo').should == true
+  describe '.new' do
+    context 'when passed a plain hash' do
+      it 'sets the database from the params hash' do
+        content_item = Boombera::ContentItem.new(:path => '/foo',
+                                                 :body => 'bar',
+                                                 :database => :the_database)
+        content_item.database.should == :the_database
+      end
     end
 
-    it 'returns false when the database does not have a content item with the specified path' do
-      view_result_without_rows = {'rows' => []}
-      db = mock(CouchRest::Database)
-      db.should_receive(:view) \
-        .with('boombera/content_map', :key => '/foo') \
-        .and_return(view_result_without_rows)
-      Boombera::ContentItem.exists?(db, '/foo').should == false
+    context 'when passed a CouchRest::Document instance' do
+      it 'sets the database as the document database' do
+        doc = CouchRest::Document.new(:path => '/foo', :body => 'bar')
+        doc.stub!(:database => :the_document_database)
+        content_item = Boombera::ContentItem.new(doc)
+        content_item.database.should == :the_document_database
+      end
     end
   end
 
   describe '#path' do
     it 'returns the path from the associated document' do
-      content = Boombera::ContentItem.new({'path' => '/index.html'})
+      content = Boombera::ContentItem.new('path' => '/index.html')
       content.path.should == '/index.html'
     end
   end
 
   describe '#body' do
     it 'returns the body from the associated document' do
-      content = Boombera::ContentItem.new({'body' => 'foo bar baz'})
+      content = Boombera::ContentItem.new('body' => 'foo bar baz')
       content.body.should == 'foo bar baz'
     end
   end
 
   describe '#body=' do
     it 'overwrites the current contents of the document body' do
-      content = Boombera::ContentItem.new({'body' => 'foo'})
+      content = Boombera::ContentItem.new('body' => 'foo')
       content.body = 'bar'
       content.body.should == 'bar'
-    end
-  end
-
-  describe '#save' do
-    it 'saves the document to the database' do
-      doc = mock(CouchRest::Document)
-      doc.should_receive(:save)
-      content = Boombera::ContentItem.new(doc)
-      content.save
     end
   end
 end

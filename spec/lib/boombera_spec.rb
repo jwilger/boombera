@@ -1,6 +1,12 @@
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'spec_helper'))
 
 describe Boombera do
+  let(:db) do
+    db = stub(CouchRest::Database)
+    CouchRest.stub!(:database! => db)
+    db
+  end
+
   before(:each) do
     Boombera.stub!(:version => '1.2.3')
     Boombera.stub!(:database_version => '1.2.3')
@@ -8,7 +14,6 @@ describe Boombera do
 
   describe '.new' do
     it 'connects to the specified database on the local couchdb server' do
-      db = stub(CouchRest::Database)
       CouchRest.should_receive(:database!) \
         .with("my_db") \
         .and_return(db)
@@ -30,21 +35,38 @@ describe Boombera do
   end
 
   describe '#put' do
-    it 'saves the content item in the database and returns a Result' do
-      CouchRest.stub!(:database! => :database)
-      Boombera::ContentItem.should_receive(:create_or_update) \
-        .with(:database, '/foo', 'bar') \
-        .and_return(:the_result)
-      boombera = Boombera.new('boombera_test')
-      boombera.put('/foo', 'bar').should == :the_result
+    let(:content_item) { mock(Boombera::ContentItem) }
+    let(:content_item_save_expectations) do
+      lambda {
+        content_item.should_receive(:body=).with('bar')
+        content_item.should_receive(:save).and_return(true)
+        boombera = Boombera.new('boombera_test')
+        boombera.put('/foo', 'bar').should == true
+      }
+    end
+
+    context "to an existing path" do
+      it 'updates and saves the existing content item' do
+        Boombera::ContentItem.should_receive(:get).with('/foo', db).and_return(content_item)
+        content_item_save_expectations.call
+      end
+    end
+
+    context "to a new path" do
+      it 'creates and saves the existing content item' do
+        Boombera::ContentItem.stub!(:get => nil)
+        Boombera::ContentItem.should_receive(:new) \
+          .with(:path => '/foo', :database => db) \
+          .and_return(content_item)
+        content_item_save_expectations.call
+      end
     end
   end
 
   describe '#get' do
     it 'gets the content item at the specified path from the current database' do
-      db = stub(CouchRest::Database).as_null_object
-      CouchRest.stub!(:database! => db)
-      Boombera::ContentItem.should_receive(:get).with(db, '/foo')
+      db.as_null_object
+      Boombera::ContentItem.should_receive(:get).with('/foo', db)
       boombera = Boombera.new('boombera_test')
       boombera.get('/foo')
     end
@@ -54,7 +76,6 @@ describe Boombera do
     context 'when the design doc does not yet exist' do
       it 'creates the design doc on the specified database' do
         Boombera.stub!(:generate_design_doc => :design_doc)
-        db = mock(CouchRest::Database)
         db.should_receive(:save_doc).with(:design_doc)
         CouchRest.should_receive(:database!) \
           .with('boombera_test') \
@@ -79,15 +100,15 @@ describe Boombera do
   end
 
   describe '.database_version' do
+    let(:db) { stub(CouchRest::Database) }
+
     it 'returns the version of Boombera that the database expects to be working with' do
-      db = mock(CouchRest::Database)
       db.should_receive(:get).with('_design/boombera') \
         .and_return({'gem_version' => '1.2.3'})
       Boombera.database_version(db).should == '1.2.3'
     end
 
     it 'returns nil if no version is specified in the database' do
-      db = mock(CouchRest::Database)
       db.stub!(:get).and_raise(RestClient::ResourceNotFound)
       Boombera.database_version(db).should be_nil
     end

@@ -1,69 +1,33 @@
-# see lib/boombera.rb
 class Boombera
-  # Boombera::ContentItem is a thin wrapper around CouchRest::Document that
-  # provides method-based access to the document fields that are important to
-  # Boombera 
-  class ContentItem
-    Result = Struct.new(:status, :content_item)
-
+  class ContentItem < CouchRest::Document
     class << self
-      def create_or_update(db, path, body)
-        if exists?(db, path)
-          update(db, path, body)
-        else
-          create(db, path, body)
-        end
-      end
-
-      def create(db, path, body)
-        db.save_doc({:path => path, :body => body})
-        Result.new(:created)
-      end
-
-      def update(db, path, body)
-        result = get(db, path)
-        document = result.content_item
-        document.body = body
-        document.save
-      end
-
-      def exists?(db, path)
-        (content_item_id_for(db, path) || false) && true
-      end
-
-      def get(db, path)
-        doc = db.get(content_item_id_for(db, path))
-        Result.new(:success, ContentItem.new(doc))
-      end
-
-      private
-
-      def content_item_id_for(db, path)
-        rows = db.view('boombera/content_map', :key => path)['rows']
+      def get(path, database)
+        rows = database.view('boombera/content_map', :key => path)['rows']
         return nil if rows.empty?
-        rows.first['id']
+        id = rows.first['id']
+        new(database.get(id))
       end
     end
 
-    def initialize(doc)
-      @doc = doc
+    def initialize(pkeys = {})
+      @database = if pkeys.respond_to?(:database)
+                    pkeys.database
+                  else
+                    pkeys.delete(:database)
+                  end
+      super
     end
 
     def path
-      @doc['path']
+      self[:path]
     end
 
     def body
-      @doc['body']
+      self[:body]
     end
 
     def body=(new_body)
-      @doc['body'] = new_body
-    end
-
-    def save
-      @doc.save
-      Result.new(:updated)
+      self[:body] = new_body
     end
   end
 end

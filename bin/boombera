@@ -12,16 +12,11 @@ begin
   when 'put'
     db = Boombera.new(database)
     result = db.put(path, body)
-    case result.status
-    when :created
-      puts "Content Created: #{path}"
-    when :updated
-      puts "Content Updated: #{path}"
-    end
+    puts "Content Saved: #{path}"
   when 'get'
     db = Boombera.new(database)
     result = db.get(path)
-    puts result.content_item.body
+    puts result.body
   end
 rescue Boombera::VersionMismatch => e
   puts e.message

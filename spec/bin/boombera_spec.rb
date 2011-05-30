@@ -22,8 +22,8 @@ describe "The boombera CLI" do
         @exit_status.should == 0
       end
 
-      it 'outputs a message indicating that the content was created' do
-        @output.should == "Content Created: /foo\n"
+      it 'outputs a message indicating that the content was saved' do
+        @output.should == "Content Saved: /foo\n"
       end
 
       it 'creates the content in the couchdb server' do
@@ -46,8 +46,8 @@ describe "The boombera CLI" do
         @exit_status.should == 0
       end
 
-      it 'outputs a message indicating that the content was updated' do
-        @output.should == "Content Updated: /bar\n"
+      it 'outputs a message indicating that the content was saved' do
+        @output.should == "Content Saved: /bar\n"
       end
 
       it 'updates the content in the couchdb server' do
