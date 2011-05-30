@@ -81,7 +81,7 @@ describe Boombera do
         db.should_receive(:documents) \
           .with(:key => '_design/boombera') \
           .and_return({'rows' => []})
-        db.should_receive(:save_doc).with(Boombera.generate_design_doc)
+        db.should_receive(:save_doc).with(Boombera.design_doc)
         Boombera.install_design_doc!('boombera_test')
       end
     end
@@ -94,7 +94,7 @@ describe Boombera do
         db.should_receive(:documents) \
           .with(:key => '_design/boombera') \
           .and_return({'rows' => [{'value' => {'rev' => '123'}}]})
-        db.should_receive(:save_doc).with(Boombera.generate_design_doc.merge('_rev' => '123'))
+        db.should_receive(:save_doc).with(Boombera.design_doc.merge('_rev' => '123'))
         Boombera.install_design_doc!('boombera_test')
       end
     end

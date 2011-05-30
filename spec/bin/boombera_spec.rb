@@ -99,7 +99,7 @@ describe "The boombera CLI" do
 
       it 'installs the boombera design document on the CouchDB instance' do
         design_doc = db.get('_design/boombera')
-        expected = Boombera.generate_design_doc
+        expected = Boombera.design_doc
         design_doc['gem_version'].should == expected['gem_version']
         design_doc['views'].should == expected['views']
       end
