@@ -4,12 +4,12 @@ require 'boombera'
 
 command, database, path, body = ARGV[0..3]
 
-case command
-when 'install'
-  Boombera.install_design_doc!(database)
-  puts "The CouchDB Boombera application has been updated to version #{Boombera.version}"
-when 'put'
-  begin
+begin
+  case command
+  when 'install'
+    Boombera.install_design_doc!(database)
+    puts "The CouchDB Boombera application has been updated to version #{Boombera.version}"
+  when 'put'
     db = Boombera.new(database)
     result = db.put(path, body)
     case result.status
@@ -18,14 +18,14 @@ when 'put'
     when :updated
       puts "Content Updated: #{path}"
     end
-  rescue Boombera::VersionMismatch => e
-    puts e.message
-    puts "You may need to run 'boombera install #{database}' to update the"
-    puts "CouchDB Boombera application."
-    exit(1)
+  when 'get'
+    db = Boombera.new(database)
+    result = db.get(path)
+    puts result.content_item.body
   end
-when 'get'
-  db = Boombera.new(database)
-  result = db.get(path)
-  puts result.content_item.body
+rescue Boombera::VersionMismatch => e
+  puts e.message
+  puts "You may need to run 'boombera install #{database}' to update the"
+  puts "CouchDB Boombera application."
+  exit(1)
 end
