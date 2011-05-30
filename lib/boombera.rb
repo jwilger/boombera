@@ -11,16 +11,15 @@ class Boombera
     end
 
     def database_version(db)
-      db.get('_design/boombera')['gem_version']
-    rescue RestClient::ResourceNotFound
-      nil
+      doc = current_design_doc(db)
+      doc && doc['gem_version']
     end
 
     def install_design_doc!(database)
       db = CouchRest.database!(database)
+      existing = current_design_doc(db)
       design = design_doc
-      existing = db.documents(:key => '_design/boombera')['rows'].first
-      design['_rev'] = existing['value']['rev'] unless existing.nil?
+      design['_rev'] = existing['_rev'] unless existing.nil?
       db.save_doc(design)
     end
 
@@ -41,6 +40,14 @@ class Boombera
           }
         }
       }
+    end
+
+    private
+
+    def current_design_doc(db)
+      db.get('_design/boombera')
+    rescue RestClient::ResourceNotFound
+      nil
     end
   end
 

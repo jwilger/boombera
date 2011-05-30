@@ -78,10 +78,11 @@ describe Boombera do
         CouchRest.should_receive(:database!) \
           .with('boombera_test') \
           .and_return(db)
-        db.should_receive(:documents) \
-          .with(:key => '_design/boombera') \
-          .and_return({'rows' => []})
-        db.should_receive(:save_doc).with(Boombera.design_doc)
+        db.should_receive(:get) \
+          .with('_design/boombera') \
+          .and_raise(RestClient::ResourceNotFound)
+        db.should_receive(:save_doc) \
+          .with(Boombera.design_doc)
         Boombera.install_design_doc!('boombera_test')
       end
     end
@@ -91,9 +92,9 @@ describe Boombera do
         CouchRest.should_receive(:database!) \
           .with('boombera_test') \
           .and_return(db)
-        db.should_receive(:documents) \
-          .with(:key => '_design/boombera') \
-          .and_return({'rows' => [{'value' => {'rev' => '123'}}]})
+        db.should_receive(:get) \
+          .with('_design/boombera') \
+          .and_return({'_id' => '_design/boombera', '_rev' => '123'})
         db.should_receive(:save_doc).with(Boombera.design_doc.merge('_rev' => '123'))
         Boombera.install_design_doc!('boombera_test')
       end
