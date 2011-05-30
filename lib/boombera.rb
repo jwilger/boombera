@@ -2,6 +2,31 @@ $:.unshift(File.expand_path(File.dirname(__FILE__)))
 require 'couchrest'
 require 'boombera/content_item'
 
+# The primary interface to the Boombera content store.
+#
+# Usage example:
+#
+#   boombera = Boombera.new('my_content_database')
+#   boombera.put('/index.html', '<p>Hello, world!</p>').status
+#   #=> :created
+#
+#   boombera.put('/index.html', '<p>Hello, friends!</p>').status
+#   #=> :updated
+#
+#   result = boombera.get('/index.html')
+#   result.status
+#   #=> :success
+#
+#   content = result.content_item
+#   content.path
+#   #=> '/index.html'
+#
+#   content.body
+#   #=> '<p>Hello, friends!</p>'
+#
+#   content.body = 'whatever'
+#   content.save.status
+#   #=> :updated
 class Boombera
   VersionMismatch = Class.new(StandardError)
 
