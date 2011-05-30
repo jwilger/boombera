@@ -62,6 +62,24 @@ describe "The boombera CLI" do
     end
   end
 
+  describe 'get command' do
+    context 'the requested content exists' do
+      before(:each) do
+        `#{BOOMBERA_CLI} put boombera_test /foo "some content"`
+        @output = `#{BOOMBERA_CLI} get boombera_test /foo`
+        @exit_status = $?.exitstatus
+      end
+
+      it 'exits with a status code of 0' do
+        @exit_status.should == 0
+      end
+
+      it 'outputs the document body to STDOUT' do
+        @output.should == "some content\n"
+      end
+    end
+  end
+
   describe "install command" do
     before(:each) do
       db.delete!

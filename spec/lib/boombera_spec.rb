@@ -40,6 +40,16 @@ describe Boombera do
     end
   end
 
+  describe '#get' do
+    it 'gets the content item at the specified path from the current database' do
+      db = stub(CouchRest::Database).as_null_object
+      CouchRest.stub!(:database! => db)
+      Boombera::ContentItem.should_receive(:get).with(db, '/foo')
+      boombera = Boombera.new('boombera_test')
+      boombera.get('/foo')
+    end
+  end
+
   describe '.install_design_doc!' do
     context 'when the design doc does not yet exist' do
       it 'creates the design doc on the specified database' do

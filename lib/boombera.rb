@@ -52,6 +52,10 @@ class Boombera
     ContentItem.create_or_update(db, path, body)
   end
 
+  def get(path)
+    ContentItem.get(db, path)
+  end
+
   private
 
   def check_database_version!

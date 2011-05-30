@@ -1,6 +1,6 @@
 class Boombera
   class ContentItem
-    Result = Struct.new(:status)
+    Result = Struct.new(:status, :content_item)
 
     class << self
       def create_or_update(db, path, body)
@@ -17,7 +17,8 @@ class Boombera
       end
 
       def update(db, path, body)
-        document = get(db, path)
+        result = get(db, path)
+        document = result.content_item
         document.body = body
         document.save
       end
@@ -28,7 +29,7 @@ class Boombera
 
       def get(db, path)
         doc = db.get(content_item_id_for(db, path))
-        ContentItem.new(doc)
+        Result.new(:success, ContentItem.new(doc))
       end
 
       private

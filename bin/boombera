@@ -24,4 +24,8 @@ when 'put'
     puts "CouchDB Boombera application."
     exit(1)
   end
+when 'get'
+  db = Boombera.new(database)
+  result = db.get(path)
+  puts result.content_item.body
 end

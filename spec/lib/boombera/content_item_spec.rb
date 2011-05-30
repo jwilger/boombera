@@ -42,11 +42,10 @@ describe Boombera::ContentItem do
 
   describe '.update' do
     it 'saves the content to the specified database' do
-      db = stub(CouchRest::Database).as_null_object
-      doc = mock(Boombera::ContentItem)
-      doc.should_receive(:body=).with('bar')
+      doc = mock(CouchRest::Document)
+      doc.should_receive(:[]=).with('body', 'bar')
       doc.should_receive(:save)
-      Boombera::ContentItem.should_receive(:get).with(db, '/foo').and_return(doc)
+      db = stub(CouchRest::Database, :get => doc).as_null_object
       Boombera::ContentItem.update(db, '/foo', 'bar')
     end
 
@@ -59,7 +58,7 @@ describe Boombera::ContentItem do
 
   describe '.get' do
     context 'with an existing content item' do
-      it 'returns a ContentItem instance for the found document' do
+      it 'returns a success Result with a ContentItem instance for the found document' do
         view_result = {'rows' => [{'id' => '123'}]}
         db = mock(CouchRest::Database)
         db.should_receive(:view) \
@@ -69,9 +68,9 @@ describe Boombera::ContentItem do
           .with('123') \
           .and_return({'path' => '/foo', 'body' => 'bar'})
         result = Boombera::ContentItem.get(db, '/foo')
-        result.should be_kind_of(Boombera::ContentItem)
-        result.path.should == '/foo'
-        result.body.should == 'bar'
+        result.status.should == :success
+        result.content_item.path.should == '/foo'
+        result.content_item.body.should == 'bar'
       end
     end
   end
