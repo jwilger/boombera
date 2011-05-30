@@ -87,20 +87,35 @@ describe "The boombera CLI" do
       @exit_status = $?.exitstatus
     end
 
-    it 'exits with a status code of 0' do
-      @exit_status.should == 0
+    shared_examples_for :a_successful_instalation do
+      it 'exits with a status code of 0' do
+        @exit_status.should == 0
+      end
+
+      it 'outputs a message indicating that the CouchDB portion of the Boombera application was installed' do
+        @output.should == "The CouchDB Boombera application has been updated to " \
+          + "version #{Boombera.version}\n"
+      end
+
+      it 'installs the boombera design document on the CouchDB instance' do
+        design_doc = db.get('_design/boombera')
+        expected = Boombera.generate_design_doc
+        design_doc['gem_version'].should == expected['gem_version']
+        design_doc['views'].should == expected['views']
+      end
     end
 
-    it 'outputs a message indicating that the CouchDB portion of the Boombera application was installed' do
-      @output.should == "The CouchDB Boombera application has been updated to " \
-        + "version #{Boombera.version}\n"
+    context 'when run for the first time' do
+      it_should_behave_like :a_successful_instalation
     end
 
-    it 'installs the boombera design document on the CouchDB instance' do
-      design_doc = db.get('_design/boombera')
-      expected = Boombera.generate_design_doc
-      design_doc['gem_version'].should == expected['gem_version']
-      design_doc['views'].should == expected['views']
+    context 'when run more than once' do
+      before(:each) do
+        @output = `#{BOOMBERA_CLI} install boombera_test`
+        @exit_status = $?.exitstatus
+      end
+
+      it_should_behave_like :a_successful_instalation
     end
   end
 end

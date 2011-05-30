@@ -18,7 +18,10 @@ class Boombera
 
     def install_design_doc!(database)
       db = CouchRest.database!(database)
-      db.save_doc(generate_design_doc)
+      design = generate_design_doc
+      existing = db.documents(:key => '_design/boombera')['rows'].first
+      design['_rev'] = existing['value']['rev'] unless existing.nil?
+      db.save_doc(design)
     end
 
     def generate_design_doc

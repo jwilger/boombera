@@ -75,11 +75,26 @@ describe Boombera do
   describe '.install_design_doc!' do
     context 'when the design doc does not yet exist' do
       it 'creates the design doc on the specified database' do
-        Boombera.stub!(:generate_design_doc => :design_doc)
-        db.should_receive(:save_doc).with(:design_doc)
         CouchRest.should_receive(:database!) \
           .with('boombera_test') \
           .and_return(db)
+        db.should_receive(:documents) \
+          .with(:key => '_design/boombera') \
+          .and_return({'rows' => []})
+        db.should_receive(:save_doc).with(Boombera.generate_design_doc)
+        Boombera.install_design_doc!('boombera_test')
+      end
+    end
+
+    context 'when the design doc already exists' do
+      it 'updates the design doc on the specified database' do
+        CouchRest.should_receive(:database!) \
+          .with('boombera_test') \
+          .and_return(db)
+        db.should_receive(:documents) \
+          .with(:key => '_design/boombera') \
+          .and_return({'rows' => [{'value' => {'rev' => '123'}}]})
+        db.should_receive(:save_doc).with(Boombera.generate_design_doc.merge('_rev' => '123'))
         Boombera.install_design_doc!('boombera_test')
       end
     end
