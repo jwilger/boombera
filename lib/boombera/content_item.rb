@@ -1,4 +1,8 @@
+# see lib/boombera.rb
 class Boombera
+  # Boombera::ContentItem is a thin wrapper around CouchRest::Document that
+  # provides method-based access to the document fields that are important to
+  # Boombera 
   class ContentItem
     Result = Struct.new(:status, :content_item)
 
