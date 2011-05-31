@@ -40,6 +40,11 @@ class Boombera::ContentItem < CouchRest::Document
     end
   end
 
+  def referenced_by
+    rows = @database.view('boombera/map_references', :key => path)['rows']
+    rows.map{ |r| r['value'] }.sort
+  end
+
   # :nodoc:
   def path
     self[:path]

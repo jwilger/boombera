@@ -164,6 +164,8 @@ describe 'The Boombera library:' do
       boombera.map('/zurg', '/foo')
       boombera.map('/bar', '/foo')
       boombera.map('/bar/baz', '/foo')
+      boombera.put('/spam', 'spam content')
+      boombera.map('/spam2', '/spam')
       content = boombera.get('/foo')
       content.referenced_by.should == ['/bar', '/bar/baz', '/zurg']
     end

@@ -34,6 +34,15 @@ module Boombera::Information
               }
             }
             EOF
+        },
+        'map_references' => {
+          'map' => <<-EOF
+            function(doc) {
+              if(doc['maps_to'] && doc.maps_to != doc.path) {
+                emit(doc.maps_to, doc.path);
+              }
+            }
+            EOF
         }
       }
     }
