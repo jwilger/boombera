@@ -33,7 +33,9 @@ class Boombera
   end
 
   def map(path, source_path)
-    raise InvalidMapping, "Tried to map #{path} to #{source_path}, but #{source_path} does not exist."
+    content_map = get(path) || ContentItem.new(path, nil, db)
+    content_map.map_to source_path
+    content_map.save
   end
 
   private

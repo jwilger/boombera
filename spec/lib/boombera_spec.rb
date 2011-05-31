@@ -7,6 +7,9 @@ describe Boombera do
     db
   end
 
+  let(:content_item) { stub(Boombera::ContentItem) }
+  let(:boombera) { Boombera.new('boombera_test') }
+
   before(:each) do
     Boombera.stub!(:version => '1.2.3')
     Boombera.stub!(:database_version => '1.2.3')
@@ -35,20 +38,12 @@ describe Boombera do
   end
 
   describe '#put' do
-    let(:content_item) { mock(Boombera::ContentItem) }
-    let(:content_item_save_expectations) do
-      lambda {
-        content_item.should_receive(:save).and_return(true)
-        boombera = Boombera.new('boombera_test')
-        boombera.put('/foo', 'bar').should == true
-      }
-    end
-
     context "to an existing path" do
       it 'updates and saves the existing content item' do
         Boombera::ContentItem.should_receive(:get).with('/foo', db).and_return(content_item)
         content_item.should_receive(:body=).with('bar')
-        content_item_save_expectations.call
+        content_item.should_receive(:save).and_return(true)
+        boombera.put('/foo', 'bar').should == true
       end
     end
 
@@ -58,7 +53,8 @@ describe Boombera do
         Boombera::ContentItem.should_receive(:new) \
           .with('/foo', 'bar', db) \
           .and_return(content_item)
-        content_item_save_expectations.call
+        content_item.should_receive(:save).and_return(true)
+        boombera.put('/foo', 'bar').should == true
       end
     end
   end
@@ -67,19 +63,47 @@ describe Boombera do
     it 'gets the content item at the specified path from the current database' do
       db.as_null_object
       Boombera::ContentItem.should_receive(:get).with('/foo', db)
-      boombera = Boombera.new('boombera_test')
       boombera.get('/foo')
     end
   end
 
   describe '#map' do
     context 'to a new path' do
-      it 'creates and saves pointer if the source document exists'
+      before(:each) do
+        Boombera::ContentItem.stub!(:get)
+        Boombera::ContentItem.should_receive(:new).with('/bar', nil, db).and_return(content_item)
+      end
+
+      it 'creates and saves ContentItem as pointer' do
+        content_item.should_receive(:map_to).with('/foo')
+        content_item.should_receive(:save).and_return(true)
+        boombera.map('/bar', '/foo').should == true
+      end
 
       it 'raises an InvalidMapping exception if the source document does not exist' do
-        boombera = Boombera.new('boombera_test')
+        content_item.stub!(:map_to).and_raise(Boombera::InvalidMapping)
         lambda { boombera.map('/bar', '/foo') }.should \
-          raise_error(Boombera::InvalidMapping, 'Tried to map /bar to /foo, but /foo does not exist.')
+          raise_error(Boombera::InvalidMapping)
+      end
+    end
+
+    context 'to an existing path' do
+      before(:each) do
+        Boombera::ContentItem.should_receive(:get) \
+          .with('/bar', db) \
+          .and_return(content_item)
+      end
+
+      it 'updates ContentItem as pointer' do
+        content_item.should_receive(:map_to).with('/foo')
+        content_item.should_receive(:save).and_return(true)
+        boombera.map('/bar', '/foo').should == true
+      end
+
+      it 'raises an InvalidMapping exception if the source document does not exist' do
+        content_item.stub!(:map_to).and_raise(Boombera::InvalidMapping)
+        lambda { boombera.map('/bar', '/foo') }.should \
+          raise_error(Boombera::InvalidMapping)
       end
     end
   end
