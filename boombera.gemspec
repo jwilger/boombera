@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{boombera}
-  s.version = "0.2.3"
+  s.version = "0.3.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["John Wilger"]
@@ -32,7 +32,6 @@ Gem::Specification.new do |s|
     "lib/boombera/content_item.rb",
     "lib/boombera/information.rb",
     "spec/integration/boombera_spec.rb",
-    "spec/lib/boombera/content_item_map_resolver_spec.rb",
     "spec/lib/boombera/content_item_spec.rb",
     "spec/lib/boombera_spec.rb",
     "spec/spec_helper.rb"
@@ -57,6 +56,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<autotest>, ["~> 4.4.6"])
       s.add_development_dependency(%q<autotest-growl>, ["~> 0.2.9"])
       s.add_development_dependency(%q<autotest-fsevent>, ["~> 0.2.5"])
+      s.add_development_dependency(%q<ruby-debug19>, ["~> 0.11.6"])
     else
       s.add_dependency(%q<couchrest>, ["~> 1.0.2"])
       s.add_dependency(%q<rspec>, ["~> 2.6.0"])
@@ -68,6 +68,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<autotest>, ["~> 4.4.6"])
       s.add_dependency(%q<autotest-growl>, ["~> 0.2.9"])
       s.add_dependency(%q<autotest-fsevent>, ["~> 0.2.5"])
+      s.add_dependency(%q<ruby-debug19>, ["~> 0.11.6"])
     end
   else
     s.add_dependency(%q<couchrest>, ["~> 1.0.2"])
@@ -80,6 +81,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<autotest>, ["~> 4.4.6"])
     s.add_dependency(%q<autotest-growl>, ["~> 0.2.9"])
     s.add_dependency(%q<autotest-fsevent>, ["~> 0.2.5"])
+    s.add_dependency(%q<ruby-debug19>, ["~> 0.11.6"])
   end
 end
 
