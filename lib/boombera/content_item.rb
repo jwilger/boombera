@@ -1,5 +1,8 @@
+# ContentItem is a specialization of CouchRest::Document that adds
+# content-mapping semantics and method-based access to the attributes that
+# Boombera knows about.
 class Boombera::ContentItem < CouchRest::Document
-  class MapResolver
+  class MapResolver #:nodoc: all
     def initialize(path, database, options = {})
       @path = path
       @database = database
@@ -27,16 +30,15 @@ class Boombera::ContentItem < CouchRest::Document
     end
   end
 
-  class << self
-    def get(path, database, options = {})
-      MapResolver.new(path, database, options).resolve
-    end
-  end
-
+  # The actual content that is being stored
   attr_accessor :body
-  attr_reader :path, :maps_to
 
-  def initialize(doc_or_path, body = nil, database = nil)
+  # The path used to access the ContentItem
+  attr_reader :path
+
+  attr_reader :maps_to #:nodoc:
+
+  def initialize(doc_or_path, body = nil, database = nil) #:nodoc:
     case doc_or_path
     when CouchRest::Document
       @database = doc_or_path.database
@@ -49,7 +51,7 @@ class Boombera::ContentItem < CouchRest::Document
     end
   end
 
-  def map_to(source_path)
+  def map_to(source_path) #:nodoc:
     rows = @database.view('boombera/content_map', :key => source_path)['rows']
     if rows.empty?
       raise Boombera::InvalidMapping,
@@ -60,29 +62,26 @@ class Boombera::ContentItem < CouchRest::Document
     end
   end
 
+  # Returns the paths that are aliased to this ContentItem
   def referenced_by
     rows = @database.view('boombera/map_references', :key => path)['rows']
     rows.map{ |row| row['value'] }.sort
   end
 
-  # :nodoc:
-  def path
+  def path #:nodoc:
     self[:path]
   end
 
-  # :nodoc:
-  def body
+  def body #:nodoc:
     self[:body]
   end
 
-  # :nodoc:
-  def body=(new_body)
+  def body=(new_body) #:nodoc:
     self[:body] = new_body
     self[:maps_to] = path unless new_body.nil?
   end
 
-  # :nodoc:
-  def maps_to
+  def maps_to #:nodoc:
     self[:maps_to]
   end
 end

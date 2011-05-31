@@ -40,9 +40,10 @@ describe Boombera do
   describe '#put' do
     context "to an existing path" do
       it 'updates and saves the existing content item' do
-        Boombera::ContentItem.should_receive(:get) \
+        resolver = stub(Boombera::ContentItem::MapResolver, :resolve => content_item)
+        Boombera::ContentItem::MapResolver.should_receive(:new) \
           .with('/foo', db, :resolve_map => false) \
-          .and_return(content_item)
+          .and_return(resolver)
         content_item.should_receive(:body=).with('bar')
         content_item.should_receive(:save).and_return(true)
         boombera.put('/foo', 'bar').should == true
@@ -51,7 +52,7 @@ describe Boombera do
 
     context "to a new path" do
       it 'creates and saves the content item' do
-        Boombera::ContentItem.stub!(:get => nil)
+        Boombera::ContentItem::MapResolver.stub!(:new => stub('resolver', :resolve => nil))
         Boombera::ContentItem.should_receive(:new) \
           .with('/foo', 'bar', db) \
           .and_return(content_item)
@@ -63,16 +64,19 @@ describe Boombera do
 
   describe '#get' do
     it 'gets the content item at the specified path from the current database' do
-      db.as_null_object
-      Boombera::ContentItem.should_receive(:get).with('/foo', db, {})
-      boombera.get('/foo')
+      resolver = stub(Boombera::ContentItem::MapResolver, :resolve => :a_content_item)
+      Boombera::ContentItem::MapResolver.should_receive(:new) \
+        .with('/foo', db) \
+        .and_return(resolver)
+      boombera.get('/foo').should == :a_content_item
     end
   end
 
   describe '#map' do
     context 'to a new path' do
       before(:each) do
-        Boombera::ContentItem.stub!(:get)
+        resolver = stub(Boombera::ContentItem::MapResolver, :resolve => nil)
+        Boombera::ContentItem::MapResolver.stub!(:new => resolver)
         Boombera::ContentItem.should_receive(:new).with('/bar', nil, db).and_return(content_item)
       end
 
@@ -91,9 +95,10 @@ describe Boombera do
 
     context 'to an existing path' do
       before(:each) do
-        Boombera::ContentItem.should_receive(:get) \
+        resolver = stub(Boombera::ContentItem::MapResolver, :resolve => content_item)
+        Boombera::ContentItem::MapResolver.should_receive(:new) \
           .with('/bar', db, :resolve_map => false) \
-          .and_return(content_item)
+          .and_return(resolver)
       end
 
       it 'updates ContentItem as pointer' do

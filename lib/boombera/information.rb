@@ -1,4 +1,4 @@
-module Boombera::Information
+module Boombera::Information #:nodoc: all
   def version
     File.read(File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'VERSION')))
   end
@@ -6,14 +6,6 @@ module Boombera::Information
   def database_version(db)
     doc = current_design_doc(db)
     doc && doc['gem_version']
-  end
-
-  def install_design_doc!(database)
-    db = CouchRest.database!(database)
-    existing = current_design_doc(db)
-    design = design_doc
-    design['_rev'] = existing['_rev'] unless existing.nil?
-    db.save_doc(design)
   end
 
   def design_doc
