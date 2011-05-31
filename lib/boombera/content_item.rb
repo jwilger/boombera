@@ -2,32 +2,26 @@
 # content-mapping semantics and method-based access to the attributes that
 # Boombera knows about.
 class Boombera::ContentItem < CouchRest::Document
-  class MapResolver #:nodoc: all
-    def initialize(path, database, options = {})
-      @path = path
-      @database = database
-      @final_attempt = options[:resolve_map] == false
-    end
-
-    def resolve
-      doc = @database.get(@path)
-      if (doc['_id'] == doc['maps_to']) || @final_attempt
-        return Boombera::ContentItem.new(doc)
-      else
-        @path = doc['maps_to']
-        resolve
-      end
-    rescue RestClient::ResourceNotFound
-      return nil
-    end
-  end
-
   # The actual content that is being stored
   attr_accessor :body
 
   # The path used to access the ContentItem, it is stored as the '_id' attribute
   # in CouchDB
   attr_reader :path
+
+  def self.get(path, db)
+    doc = get_pointer(path, db)
+    until doc.nil? || doc.resolved?
+      doc = get_pointer(doc.maps_to, db)
+    end
+    doc
+  end
+
+  def self.get_pointer(path, db)
+    Boombera::ContentItem.new(db.get(path))
+  rescue RestClient::ResourceNotFound
+    nil
+  end
 
   def initialize(doc_or_path, body = nil, database = nil) #:nodoc:
     case doc_or_path
@@ -63,6 +57,10 @@ class Boombera::ContentItem < CouchRest::Document
     self['maps_to'] = maps_to
     self['type'] = 'content_item'
     super
+  end
+
+  def resolved?
+    path == maps_to
   end
 
   def maps_to #:nodoc:

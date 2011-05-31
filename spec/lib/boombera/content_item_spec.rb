@@ -135,4 +135,18 @@ describe Boombera::ContentItem do
       end
     end
   end
+
+  describe '#resolved' do
+    it 'returns true if maps_to == path' do
+      content = Boombera::ContentItem.new('/foo', 'bar', db)
+      content.should be_resolved
+    end
+
+    it 'returns false if maps_to != path' do
+      db.stub!(:view => {'rows' => [{'id' => '/bar'}]})
+      content = Boombera::ContentItem.new('/foo', nil, db)
+      content.map_to '/bar'
+      content.should_not be_resolved
+    end
+  end
 end
