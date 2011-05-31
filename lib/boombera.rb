@@ -70,7 +70,7 @@ class Boombera
   extend Boombera::Information
 
   # The CouchRest::Database instance
-  attr_reader :db
+  attr_reader :database
 
   # Connects to the CouchDB server and verifies the database version.
   # 
@@ -81,7 +81,7 @@ class Boombera
   #
   # raises:: VersionMismatch
   def initialize(database_name)
-    @db = CouchRest.database!(database_name)
+    @database = CouchRest.database!(database_name)
     check_database_version!
   end
 
@@ -111,7 +111,7 @@ class Boombera
   # +path+:: should be a String with /-separated tokens (i.e. "/foo/bar/baz").
   def put(path, body)
     content_item = get_pointer(path) and content_item.body = body
-    content_item ||= ContentItem.new(path, body, db)
+    content_item ||= ContentItem.new(path, body, database)
     content_item.save
   end
 
@@ -119,7 +119,7 @@ class Boombera
   # is found. If +path+ is mapped to another ContentItem, the resolved
   # ContentItem will be returned.
   def get(path)
-    ContentItem::MapResolver.new(path, db).resolve
+    ContentItem::MapResolver.new(path, database).resolve
   end
 
   # Creates a content mapping so that two paths can reference the same content
@@ -131,7 +131,7 @@ class Boombera
   # 
   # raises:: InvalidMapping
   def map(path, source_path)
-    content_map = get_pointer(path) || ContentItem.new(path, nil, db)
+    content_map = get_pointer(path) || ContentItem.new(path, nil, database)
     content_map.map_to source_path
     content_map.save
   end
@@ -139,11 +139,11 @@ class Boombera
   private
 
   def get_pointer(path)
-    ContentItem::MapResolver.new(path, db, :resolve_map => false).resolve
+    ContentItem::MapResolver.new(path, database, :resolve_map => false).resolve
   end
 
   def check_database_version!
-    database_version = Boombera.database_version(db)
+    database_version = Boombera.database_version(database)
     unless Boombera.version == database_version
       msg = if database_version.nil?
               "Database does not specify a Boombera version"

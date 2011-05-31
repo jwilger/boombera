@@ -21,7 +21,7 @@ describe Boombera do
         .with("my_db") \
         .and_return(db)
       boombera = Boombera.new('my_db')
-      boombera.db.should == db
+      boombera.database.should == db
     end
 
     it 'raises a VersionMismatch error with expected version if the database does not match VERSION' do
