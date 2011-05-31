@@ -61,11 +61,11 @@ class Boombera
   # Exception is raised when connecting to a Boombera CouchDB database that
   # expects a different version of the Boombera library than the one currently
   # being used.
-  VersionMismatch = Class.new(StandardError)
+  class VersionMismatch < StandardError; end
 
   # Exception is raised when attempting to create a content mapping and the
   # source document doesn't exist.
-  InvalidMapping = Class.new(RuntimeError)
+  class InvalidMapping < RuntimeError; end
 
   extend Boombera::Information
 
