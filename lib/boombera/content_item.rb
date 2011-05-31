@@ -1,15 +1,20 @@
 class Boombera::ContentItem < CouchRest::Document
   class << self
-    def get(path, database)
+    def get(path, database, options = {})
       rows = database.view('boombera/content_map', :key => path)['rows']
       return nil if rows.empty?
-      id = rows.first['id']
-      new(database.get(id))
+      match = rows.first
+      maps_to = match['value']
+      if maps_to == path || options[:resolve_map] == false
+        new(database.get(match['id']))
+      else
+        get(maps_to, database)
+      end
     end
   end
 
   attr_accessor :body
-  attr_reader :path
+  attr_reader :path, :maps_to
 
   def initialize(doc_or_path, body = nil, database = nil)
     case doc_or_path
@@ -22,6 +27,22 @@ class Boombera::ContentItem < CouchRest::Document
     else
       raise ArgumentError, "doc_or_path must either be an instance of CouchRest::Document or a String"
     end
+  end
+
+  def map_to(source_path)
+    rows = @database.view('boombera/content_map', :key => source_path)['rows']
+    if rows.empty?
+      raise Boombera::InvalidMapping,
+        "Tried to map #{path} to #{source_path}, but #{source_path} doesn't exist."
+    else
+      self.body = nil
+      self[:maps_to] = source_path
+    end
+  end
+
+  def referenced_by
+    rows = @database.view('boombera/map_references', :key => path)['rows']
+    rows.map{ |r| r['value'] }.sort
   end
 
   # :nodoc:
@@ -37,5 +58,11 @@ class Boombera::ContentItem < CouchRest::Document
   # :nodoc:
   def body=(new_body)
     self[:body] = new_body
+    self[:maps_to] = path unless new_body.nil?
+  end
+
+  # :nodoc:
+  def maps_to
+    self[:maps_to]
   end
 end
