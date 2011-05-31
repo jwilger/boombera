@@ -81,6 +81,52 @@ describe 'The Boombera library:' do
       document['path'].should == '/foo'
       document['body'].should == 'the new content'
     end
+
+    it 'turns a pointer into a content item' do
+      boombera.put('/foo', 'foo bar baz')
+      boombera.map('/bar', '/foo')
+      boombera.put('/bar', 'the new content')
+      results = db.view('boombera/content_map', :key => '/bar')['rows']
+      results.length.should == 1
+      document = db.get(results.first['id'])
+      document['path'].should == '/foo'
+      document['body'].should == 'the new content'
+      document['points_to'].should be_nil
+    end
+  end
+
+  describe 'mapping content aliases' do
+    it 'creates a pointer from a path to another path' do
+      boombera.put('/foo', 'foo bar baz')
+      boombera.map('/bar', '/foo')
+      results = db.view('boombera/content_map', :key => '/bar')['rows']
+      results.length.should == 1
+      map_item = results.first
+      map_item.value.should == '/foo'
+    end
+
+    it 'updates a pointer from a path to another path' do
+      boombera.put('/foo', 'foo bar baz')
+      boombera.put('/spam', 'ham spam can')
+      boombera.map('/bar', '/foo')
+      boombera.map('/bar', '/spam')
+      results = db.view('boombera/content_map', :key => '/bar')['rows']
+      results.length.should == 1
+      map_item = results.first
+      map_item.value.should == '/spam'
+    end
+
+    it 'turns a content item into a pointer' do
+      boombera.put('/foo', 'foo bar baz')
+      boombera.put('/bar', 'some old bar content')
+      boombera.map('/bar', '/foo')
+      results = db.view('boombera/content_map', :key => '/bar')['rows']
+      results.length.should == 1
+      map_item = results.first
+      map_item.value.should == '/spam'
+      doc = db.get(map_item['id'])
+      doc['body'].should be_nil
+    end
   end
 
   describe 'getting content from the database' do
@@ -94,6 +140,14 @@ describe 'The Boombera library:' do
       result.path.should == '/index'
       result.body.should == 'Hello, World!'
     end
+
+    it 'gives you the resulting ContentItem when a pointer is requested' do
+      boombera.put('/foo', 'some content')
+      boombera.map('/bar', '/foo')
+      result = boombera.get('/bar')
+      result.path.should == '/foo'
+      result.body.should == 'some content'
+    end
   end
 
   describe 'working with ContentItem' do
@@ -103,6 +157,15 @@ describe 'The Boombera library:' do
       content.body = 'new content'
       content.save
       boombera.get('/foo').body.should == 'new content'
+    end
+
+    it 'knows which pointers reference it' do
+      boombera.put('/foo', 'some content')
+      boombera.map('/zurg', '/foo')
+      boombera.map('/bar', '/foo')
+      boombera.map('/bar/baz', '/foo')
+      content = boombera.get('/foo')
+      content.referenced_by.should == ['/bar', '/bar/baz', '/zurg']
     end
   end
 end

@@ -53,7 +53,7 @@ describe Boombera do
     end
 
     context "to a new path" do
-      it 'creates and saves the existing content item' do
+      it 'creates and saves the content item' do
         Boombera::ContentItem.stub!(:get => nil)
         Boombera::ContentItem.should_receive(:new) \
           .with('/foo', 'bar', db) \
@@ -69,6 +69,18 @@ describe Boombera do
       Boombera::ContentItem.should_receive(:get).with('/foo', db)
       boombera = Boombera.new('boombera_test')
       boombera.get('/foo')
+    end
+  end
+
+  describe '#map' do
+    context 'to a new path' do
+      it 'creates and saves pointer if the source document exists'
+
+      it 'raises an InvalidMapping exception if the source document does not exist' do
+        boombera = Boombera.new('boombera_test')
+        lambda { boombera.map('/bar', '/foo') }.should \
+          raise_error(Boombera::InvalidMapping, 'Tried to map /bar to /foo, but /foo does not exist.')
+      end
     end
   end
 

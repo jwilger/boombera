@@ -11,6 +11,7 @@ require 'boombera/information'
 
 class Boombera
   VersionMismatch = Class.new(StandardError)
+  InvalidMapping = Class.new(RuntimeError)
 
   extend Boombera::Information
 
@@ -29,6 +30,10 @@ class Boombera
 
   def get(path)
     ContentItem.get(path, db)
+  end
+
+  def map(path, source_path)
+    raise InvalidMapping, "Tried to map #{path} to #{source_path}, but #{source_path} does not exist."
   end
 
   private
