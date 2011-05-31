@@ -40,6 +40,10 @@ Boombera's content-mapping functionality reduces both the size of the database
 and the necessary network traffic for database updates when much of the content
 is identical between customers and/or deployment stages.
 
+== Installation
+
+  gem install boombera
+
 == Usage Examples
 
 See the documentation on the Boombera class.

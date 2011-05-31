@@ -3,7 +3,7 @@ require 'couchrest'
 
 # This is the main interface to the Boombera content repository.
 #
-# Usage examples:
+# == Usage examples:
 #
 #   # install/update the CouchDB design document
 #   Boombera.install_design_doc!('my_database')
