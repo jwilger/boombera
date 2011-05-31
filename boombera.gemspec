@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{boombera}
-  s.version = "0.1.1"
+  s.version = "0.1.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["John Wilger"]
@@ -30,6 +30,7 @@ Gem::Specification.new do |s|
     "boombera.gemspec",
     "lib/boombera.rb",
     "lib/boombera/content_item.rb",
+    "lib/boombera/information.rb",
     "spec/integration/boombera_spec.rb",
     "spec/lib/boombera/content_item_spec.rb",
     "spec/lib/boombera_spec.rb",
