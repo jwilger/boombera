@@ -1,16 +1,63 @@
-= boombera
+= Boombera
 
-Description goes here.
+Boombera is a CouchDB-backed content repository aimed at multi-stage,
+multi-tenant web applications. If your application supports multiple customers,
+allows each customer to customize the content within their context, and goes
+through a staged deployment process (alpha -> beta -> staging -> production,
+etc.), then the Boombera content store can help you manage content that can be
+inherited and possibly overridden down hierarchies of both customer and
+environment.
 
-== Contributing to boombera
+== What Boombera Isn't
+
+Boombera does not provide a GUI for managing content; it is *not* a CMS.
+However, it does provide the code level interface for inserting content into the
+database, so you could build a CMS on top of it.
+
+Currently, Boombera does not attempt to understand the semantics of your
+customer and deployment hierarchies. While you can map one content path to
+another via the API, both your CMS and your consuming application must have
+knowledge of these hierarchies and how they map to your content paths. This
+hierarchy-awareness may be added to a future version of Boombera.
+
+== Why Use Boombera
+
+One of the major advantages of Boombera is CouchDB itself. CouchDB's excellent
+replication makes it easy to have your CMS update content on it's local CouchDB
+instance and have that content pushed out to replica databases on your
+application servers. This means you don't need to communicate over the network
+every time your application needs to fetch content.
+
+Because CouchDB can replicate bi-directionally, it should also be possible to
+support edit-in-place features within your application while still having that
+content pushed back to your CMS and to any additional application servers.
+Another application of this is to allow developers to work off-line, updating
+content that is tied to the features they are working on, and then have that
+updated content replicated back to the shared development infrastructure once
+they are finished.
+
+Boombera's content-mapping functionality reduces both the size of the database
+and the necessary network traffic for database updates when much of the content
+is identical between customers and/or deployment stages.
+
+== Usage Examples
+
+See the documentation on the Boombera class.
+
+== Contributing to Boombera
  
-* Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
-* Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it
+* Check out the latest master to make sure the feature hasn't been implemented
+  or the bug hasn't been fixed yet
+* Check out the issue tracker to make sure someone already hasn't requested it
+  and/or contributed it
 * Fork the project
 * Start a feature/bugfix branch
 * Commit and push until you are happy with your contribution
-* Make sure to add tests for it. This is important so I don't break it in a future version unintentionally.
-* Please try not to mess with the Rakefile, version, or history. If you want to have your own version, or is otherwise necessary, that is fine, but please isolate to its own commit so I can cherry-pick around it.
+* Make sure to add tests for it. This is important so I don't break it in a
+  future version unintentionally.
+* Please try not to mess with the Rakefile, version, or history. If you want to
+  have your own version, or is otherwise necessary, that is fine, but please
+  isolate to its own commit so I can cherry-pick around it.
 
 == Copyright
 
