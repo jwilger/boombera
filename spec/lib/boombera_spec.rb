@@ -92,7 +92,7 @@ describe Boombera do
     context 'to an existing path' do
       before(:each) do
         Boombera::ContentItem.should_receive(:get) \
-          .with('/bar', db, {}) \
+          .with('/bar', db, :resolve_map => false) \
           .and_return(content_item)
       end
 

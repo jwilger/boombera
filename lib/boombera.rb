@@ -33,7 +33,7 @@ class Boombera
   end
 
   def map(path, source_path)
-    content_map = get(path) || ContentItem.new(path, nil, db)
+    content_map = get(path, :resolve_map => false) || ContentItem.new(path, nil, db)
     content_map.map_to source_path
     content_map.save
   end
