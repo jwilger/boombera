@@ -38,7 +38,6 @@ describe Boombera do
     let(:content_item) { mock(Boombera::ContentItem) }
     let(:content_item_save_expectations) do
       lambda {
-        content_item.should_receive(:body=).with('bar')
         content_item.should_receive(:save).and_return(true)
         boombera = Boombera.new('boombera_test')
         boombera.put('/foo', 'bar').should == true
@@ -48,6 +47,7 @@ describe Boombera do
     context "to an existing path" do
       it 'updates and saves the existing content item' do
         Boombera::ContentItem.should_receive(:get).with('/foo', db).and_return(content_item)
+        content_item.should_receive(:body=).with('bar')
         content_item_save_expectations.call
       end
     end
@@ -56,7 +56,7 @@ describe Boombera do
       it 'creates and saves the existing content item' do
         Boombera::ContentItem.stub!(:get => nil)
         Boombera::ContentItem.should_receive(:new) \
-          .with(:path => '/foo', :database => db) \
+          .with('/foo', 'bar', db) \
           .and_return(content_item)
         content_item_save_expectations.call
       end

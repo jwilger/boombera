@@ -11,7 +11,7 @@ describe Boombera::ContentItem do
           .and_return(view_result)
         db.should_receive(:get) \
           .with('123') \
-          .and_return({'path' => '/foo', 'body' => 'bar'})
+          .and_return(CouchRest::Document.new('path' => '/foo', 'body' => 'bar'))
         result = Boombera::ContentItem.get('/foo', db)
         result.path.should == '/foo'
         result.body.should == 'bar'
@@ -20,11 +20,9 @@ describe Boombera::ContentItem do
   end
 
   describe '.new' do
-    context 'when passed a plain hash' do
-      it 'sets the database from the params hash' do
-        content_item = Boombera::ContentItem.new(:path => '/foo',
-                                                 :body => 'bar',
-                                                 :database => :the_database)
+    context 'when passed a path, body and database' do
+      it 'sets the database from the database argument' do
+        content_item = Boombera::ContentItem.new('/foo', 'bar', :the_database)
         content_item.database.should == :the_database
       end
     end
@@ -41,21 +39,21 @@ describe Boombera::ContentItem do
 
   describe '#path' do
     it 'returns the path from the associated document' do
-      content = Boombera::ContentItem.new('path' => '/index.html')
+      content = Boombera::ContentItem.new('/index.html')
       content.path.should == '/index.html'
     end
   end
 
   describe '#body' do
     it 'returns the body from the associated document' do
-      content = Boombera::ContentItem.new('body' => 'foo bar baz')
+      content = Boombera::ContentItem.new('/foo', 'foo bar baz')
       content.body.should == 'foo bar baz'
     end
   end
 
   describe '#body=' do
     it 'overwrites the current contents of the document body' do
-      content = Boombera::ContentItem.new('body' => 'foo')
+      content = Boombera::ContentItem.new('/foo', 'not bar')
       content.body = 'bar'
       content.body.should == 'bar'
     end

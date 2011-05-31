@@ -22,8 +22,8 @@ class Boombera
   end
 
   def put(path, body)
-    content_item = get(path) || ContentItem.new(:path => path, :database => db)
-    content_item.body = body
+    content_item = get(path) and content_item.body = body
+    content_item ||= ContentItem.new(path, body, db)
     content_item.save
   end
 

@@ -11,13 +11,17 @@ class Boombera::ContentItem < CouchRest::Document
   attr_accessor :body
   attr_reader :path
 
-  def initialize(pkeys = {})
-    @database = if pkeys.respond_to?(:database)
-                  pkeys.database
-                else
-                  pkeys.delete(:database)
-                end
-    super
+  def initialize(doc_or_path, body = nil, database = nil)
+    case doc_or_path
+    when CouchRest::Document
+      @database = doc_or_path.database
+      super(doc_or_path)
+    when String
+      @database = database
+      super(:path => doc_or_path, :body => body)
+    else
+      raise ArgumentError, "doc_or_path must either be an instance of CouchRest::Document or a String"
+    end
   end
 
   # :nodoc:
