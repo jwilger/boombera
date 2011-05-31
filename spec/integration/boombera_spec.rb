@@ -65,20 +65,16 @@ describe 'The Boombera library:' do
   describe 'putting content in the database' do
     it 'saves content to a new path' do
       boombera.put('/foo', 'foo bar baz')
-      results = db.view('boombera/content_map', :key => '/foo')['rows']
-      results.length.should == 1
-      document = db.get(results.first['id'])
-      document['path'].should == '/foo'
+      document = db.get('/foo')
+      document['_id'].should == '/foo'
       document['body'].should == 'foo bar baz'
     end
 
     it 'saves content to an existing path' do
       boombera.put('/foo', 'foo bar baz')
       boombera.put('/foo', 'the new content')
-      results = db.view('boombera/content_map', :key => '/foo')['rows']
-      results.length.should == 1
-      document = db.get(results.first['id'])
-      document['path'].should == '/foo'
+      document = db.get('/foo')
+      document['_id'].should == '/foo'
       document['body'].should == 'the new content'
     end
 
@@ -86,12 +82,10 @@ describe 'The Boombera library:' do
       boombera.put('/foo', 'foo bar baz')
       boombera.map('/bar', '/foo')
       boombera.put('/bar', 'the new content')
-      results = db.view('boombera/content_map', :key => '/bar')['rows']
-      results.length.should == 1
-      document = db.get(results.first['id'])
-      document['path'].should == '/bar'
+      document = db.get('/bar')
+      document['_id'].should == '/bar'
       document['body'].should == 'the new content'
-      document['points_to'].should be_nil
+      document['maps_to'].should == '/bar'
     end
   end
 
@@ -99,10 +93,9 @@ describe 'The Boombera library:' do
     it 'creates a pointer from a path to another path' do
       boombera.put('/foo', 'foo bar baz')
       boombera.map('/bar', '/foo')
-      results = db.view('boombera/content_map', :key => '/bar')['rows']
-      results.length.should == 1
-      map_item = results.first
-      map_item['value'].should == '/foo'
+      result = boombera.get('/bar')
+      result.path.should == '/foo'
+      result.body.should == 'foo bar baz'
     end
 
     it 'updates a pointer from a path to another path' do
@@ -110,22 +103,18 @@ describe 'The Boombera library:' do
       boombera.put('/spam', 'ham spam can')
       boombera.map('/bar', '/foo')
       boombera.map('/bar', '/spam')
-      results = db.view('boombera/content_map', :key => '/bar')['rows']
-      results.length.should == 1
-      map_item = results.first
-      map_item['value'].should == '/spam'
+      result = boombera.get('/bar')
+      result.path.should == '/spam'
+      result.body.should == 'ham spam can'
     end
 
     it 'turns a content item into a pointer' do
       boombera.put('/foo', 'foo bar baz')
       boombera.put('/bar', 'some old bar content')
       boombera.map('/bar', '/foo')
-      results = db.view('boombera/content_map', :key => '/bar')['rows']
-      results.length.should == 1
-      map_item = results.first
-      map_item['value'].should == '/foo'
-      doc = db.get(map_item['id'])
-      doc['body'].should be_nil
+      result = boombera.get('/bar')
+      result.path.should == '/foo'
+      result.body.should == 'foo bar baz'
     end
   end
 
@@ -135,7 +124,7 @@ describe 'The Boombera library:' do
     end
 
     it 'gives you a ContentItem if the content is there' do
-      db.save_doc({'path' => '/index', 'body' => 'Hello, World!'})
+      boombera.put('/index', 'Hello, World!')
       result = boombera.get('/index')
       result.path.should == '/index'
       result.body.should == 'Hello, World!'

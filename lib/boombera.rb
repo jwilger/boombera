@@ -110,7 +110,8 @@ class Boombera
   # +body+:: can be # any object that can convert to JSON.
   # +path+:: should be a String with /-separated tokens (i.e. "/foo/bar/baz").
   def put(path, body)
-    content_item = get_pointer(path) and content_item.body = body
+    content_item = ContentItem.get_pointer(path, database)  \
+      and content_item.body = body
     content_item ||= ContentItem.new(path, body, database)
     content_item.save
   end
@@ -119,7 +120,7 @@ class Boombera
   # is found. If +path+ is mapped to another ContentItem, the resolved
   # ContentItem will be returned.
   def get(path)
-    ContentItem::MapResolver.new(path, database).resolve
+    ContentItem.get(path, database)
   end
 
   # Creates a content mapping so that two paths can reference the same content
@@ -131,17 +132,13 @@ class Boombera
   # 
   # raises:: InvalidMapping
   def map(path, source_path)
-    content_map = get_pointer(path) || ContentItem.new(path, nil, database)
+    content_map = ContentItem.get_pointer(path, database) \
+      || ContentItem.new(path, nil, database)
     content_map.map_to source_path
     content_map.save
   end
 
   private
-
-  def get_pointer(path)
-    ContentItem::MapResolver.new(path, database, :resolve_map => false).resolve
-  end
-
   def check_database_version!
     database_version = Boombera.database_version(database)
     unless Boombera.version == database_version

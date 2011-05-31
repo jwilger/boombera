@@ -12,4 +12,5 @@ group :development do
   gem 'autotest', '~> 4.4.6'
   gem 'autotest-growl', '~> 0.2.9'
   gem 'autotest-fsevent', '~> 0.2.5'
+  gem 'ruby-debug19', '~> 0.11.6'
 end

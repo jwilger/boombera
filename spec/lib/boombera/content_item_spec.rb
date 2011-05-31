@@ -1,6 +1,12 @@
 require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'spec_helper'))
 
 describe Boombera::ContentItem do
+  let(:db) do
+    db = stub(CouchRest::Database)
+    CouchRest.stub!(:database! => db)
+    db
+  end
+
   describe '.new' do
     context 'when passed a path, body and database' do
       it 'sets the database from the database argument' do
@@ -20,9 +26,15 @@ describe Boombera::ContentItem do
   end
 
   describe '#path' do
-    it 'returns the path from the associated document' do
+    it 'returns the path from the arguments' do
       content = Boombera::ContentItem.new('/index.html')
       content.path.should == '/index.html'
+    end
+
+    it 'returns the _id when initialized with a Document' do
+      doc = CouchRest::Document.new('_id' => '/foobar')
+      content = Boombera::ContentItem.new(doc)
+      content.path.should == '/foobar'
     end
   end
 
@@ -34,26 +46,11 @@ describe Boombera::ContentItem do
   end
 
   describe '#body=' do
-    let(:db) { stub(CouchRest::Database) }
     let(:content) { Boombera::ContentItem.new('/foo', 'not bar', db) }
 
     it 'overwrites the current contents of the document body' do
       content.body = 'bar'
       content.body.should == 'bar'
-    end
-
-    it 'sets the maps_to attribute equal to the path attribute if argument is not nil' do
-      db.stub!(:view => {'rows' => [{'value' => '/foo'}]})
-      content.map_to '/bar'
-      content.body = 'something'
-      content.maps_to.should == '/foo'
-    end
-
-    it 'does not change the maps_to attribute if the argument is nil' do
-      db.stub!(:view => {'rows' => [{'value' => '/foo'}]})
-      content.map_to '/bar'
-      content.body = nil
-      content.maps_to.should == '/bar'
     end
   end
 
@@ -74,8 +71,8 @@ describe Boombera::ContentItem do
 
       before(:each) do
         db.should_receive(:view) \
-          .with('boombera/content_map', :key => '/foo') \
-          .and_return({'rows' => [{'value' => '/foo'}]})
+          .with('boombera/content_paths', :key => '/foo') \
+          .and_return({'rows' => [{'id' => '/foo'}]})
         content.map_to '/foo'
       end
 
@@ -86,6 +83,70 @@ describe Boombera::ContentItem do
       it 'sets the body attribute to nil' do
         content.body.should be_nil
       end
+    end
+  end
+
+  describe '#save' do
+    it 'ensures that the type attribute is set to "content_item"' do
+      content = Boombera::ContentItem.new('/foo', 'bar', db)
+      db.should_receive(:save_doc) \
+        .with({'_id' => '/foo', 'body' => 'bar', 'type' => 'content_item',
+              'maps_to' => '/foo'}, false) \
+        .and_return({'ok' => true})
+      content.save
+    end
+
+    context 'when the body is not nil' do
+      it 'sets the maps_to attribute equal to the path' do
+        content = Boombera::ContentItem.new('/foo', 'bar', db)
+        db.should_receive(:save_doc) \
+          .with({'_id' => '/foo', 'body' => 'bar', 'type' => 'content_item',
+                'maps_to' => '/foo'}, false) \
+                .and_return({'ok' => true})
+        content.save
+      end
+
+      context 'but the maps_to attribute points to another document' do
+        it 'sets the maps_to attribute equal to the path' do
+          db.stub!(:view => {'rows' => [{'id' => '/bar'}]})
+          content = Boombera::ContentItem.new('/foo', nil, db)
+          content.map_to('/bar')
+          content.body = 'bar'
+          db.should_receive(:save_doc) \
+            .with({'_id' => '/foo', 'body' => 'bar', 'type' => 'content_item',
+                  'maps_to' => '/foo'}, false) \
+                  .and_return({'ok' => true})
+          content.save
+        end
+      end
+    end
+
+    context 'when the body is nil' do
+      it 'does not change the maps_to attribute if it is already set' do
+        # stub result from boombera/content_paths view
+        db.stub(:view => {'rows' => [{'id' => '/bar'}]})
+        content = Boombera::ContentItem.new('/foo', nil, db)
+        content.map_to('/bar')
+        db.should_receive(:save_doc) \
+          .with({'_id' => '/foo', 'body' => nil, 'type' => 'content_item',
+                'maps_to' => '/bar'}, false) \
+                .and_return({'ok' => true})
+        content.save
+      end
+    end
+  end
+
+  describe '#resolved' do
+    it 'returns true if maps_to == path' do
+      content = Boombera::ContentItem.new('/foo', 'bar', db)
+      content.should be_resolved
+    end
+
+    it 'returns false if maps_to != path' do
+      db.stub!(:view => {'rows' => [{'id' => '/bar'}]})
+      content = Boombera::ContentItem.new('/foo', nil, db)
+      content.map_to '/bar'
+      content.should_not be_resolved
     end
   end
 end
