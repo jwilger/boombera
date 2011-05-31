@@ -1,15 +1,10 @@
 $:.unshift(File.expand_path(File.dirname(__FILE__)))
 require 'couchrest'
 
-# Boombera constant is defined first as `Class.new` so that the definitions in
-# the required files can use `class Boombera::Whatever` even with the `require`
-# statements appearing before the actual class definition.
-Boombera = Class.new
-
-require 'boombera/content_item'
-require 'boombera/information'
-
 class Boombera
+  require 'boombera/content_item'
+  require 'boombera/information'
+
   VersionMismatch = Class.new(StandardError)
   InvalidMapping = Class.new(RuntimeError)
 
