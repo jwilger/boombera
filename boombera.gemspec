@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{boombera}
-  s.version = "0.2.1"
+  s.version = "0.2.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["John Wilger"]
-  s.date = %q{2011-05-30}
+  s.date = %q{2011-05-31}
   s.description = %q{CouchDB-backed content repository for multi-tenant, multi-stage applications}
   s.email = %q{johnwilger@gmail.com}
   s.extra_rdoc_files = [
@@ -32,6 +32,7 @@ Gem::Specification.new do |s|
     "lib/boombera/content_item.rb",
     "lib/boombera/information.rb",
     "spec/integration/boombera_spec.rb",
+    "spec/lib/boombera/content_item_map_resolver_spec.rb",
     "spec/lib/boombera/content_item_spec.rb",
     "spec/lib/boombera_spec.rb",
     "spec/spec_helper.rb"
