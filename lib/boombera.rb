@@ -41,7 +41,7 @@ class Boombera
   private
 
   def check_database_version!
-    database_version ||= Boombera.database_version(db)
+    database_version = Boombera.database_version(db)
     unless Boombera.version == database_version
       msg = if database_version.nil?
               "Database does not specify a Boombera version"
