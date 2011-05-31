@@ -1,55 +1,18 @@
 $:.unshift(File.expand_path(File.dirname(__FILE__)))
 require 'couchrest'
+
+# Boombera constant is defined first as `Class.new` so that the definitions in
+# the required files can use `class Boombera::Whatever` even with the `require`
+# statements appearing before the actual class definition.
+Boombera = Class.new
+
 require 'boombera/content_item'
+require 'boombera/information'
 
 class Boombera
   VersionMismatch = Class.new(StandardError)
 
-  class << self
-    def version
-      File.read(File.expand_path(File.join(File.dirname(__FILE__), '..', 'VERSION')))
-    end
-
-    def database_version(db)
-      doc = current_design_doc(db)
-      doc && doc['gem_version']
-    end
-
-    def install_design_doc!(database)
-      db = CouchRest.database!(database)
-      existing = current_design_doc(db)
-      design = design_doc
-      design['_rev'] = existing['_rev'] unless existing.nil?
-      db.save_doc(design)
-    end
-
-    def design_doc
-      {
-        '_id' => '_design/boombera',
-        'language' => 'javascript',
-        'gem_version' => version,
-        'views' => {
-          'content_map' => {
-            'map' => <<-EOF
-              function(doc) {
-                if (doc['path']) {
-                  emit(doc.path, doc.path);
-                }
-              }
-              EOF
-          }
-        }
-      }
-    end
-
-    private
-
-    def current_design_doc(db)
-      db.get('_design/boombera')
-    rescue RestClient::ResourceNotFound
-      nil
-    end
-  end
+  extend Boombera::Information
 
   attr_reader :db
 
