@@ -89,7 +89,7 @@ describe 'The Boombera library:' do
       results = db.view('boombera/content_map', :key => '/bar')['rows']
       results.length.should == 1
       document = db.get(results.first['id'])
-      document['path'].should == '/foo'
+      document['path'].should == '/bar'
       document['body'].should == 'the new content'
       document['points_to'].should be_nil
     end
@@ -102,7 +102,7 @@ describe 'The Boombera library:' do
       results = db.view('boombera/content_map', :key => '/bar')['rows']
       results.length.should == 1
       map_item = results.first
-      map_item.value.should == '/foo'
+      map_item['value'].should == '/foo'
     end
 
     it 'updates a pointer from a path to another path' do
@@ -113,7 +113,7 @@ describe 'The Boombera library:' do
       results = db.view('boombera/content_map', :key => '/bar')['rows']
       results.length.should == 1
       map_item = results.first
-      map_item.value.should == '/spam'
+      map_item['value'].should == '/spam'
     end
 
     it 'turns a content item into a pointer' do
@@ -123,7 +123,7 @@ describe 'The Boombera library:' do
       results = db.view('boombera/content_map', :key => '/bar')['rows']
       results.length.should == 1
       map_item = results.first
-      map_item.value.should == '/spam'
+      map_item['value'].should == '/foo'
       doc = db.get(map_item['id'])
       doc['body'].should be_nil
     end

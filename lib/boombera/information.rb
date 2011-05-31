@@ -26,7 +26,11 @@ module Boombera::Information
           'map' => <<-EOF
             function(doc) {
               if (doc['path']) {
-                emit(doc.path, doc.path);
+                if (doc['maps_to']) {
+                  emit(doc.path, doc.maps_to);
+                } else {
+                  emit(doc.path, doc.path);
+                }
               }
             }
             EOF
