@@ -1,15 +1,35 @@
 class Boombera::ContentItem < CouchRest::Document
+  class MapResolver
+    def initialize(path, database, options = {})
+      @path = path
+      @database = database
+      @final_attempt = options[:resolve_map] == false
+    end
+
+    def resolve
+      id, maps_to = content_map
+      return if id.nil?
+      if @final_attempt || maps_to == @path
+        Boombera::ContentItem.new(@database.get(id))
+      else
+        @path = maps_to
+        resolve
+      end
+    end
+
+    private
+
+    def content_map
+      rows = @database.view('boombera/content_map', :key => @path)['rows']
+      return if rows.empty?
+      match = rows.first
+      [match['id'], match['value']]
+    end
+  end
+
   class << self
     def get(path, database, options = {})
-      rows = database.view('boombera/content_map', :key => path)['rows']
-      return nil if rows.empty?
-      match = rows.first
-      maps_to = match['value']
-      if maps_to == path || options[:resolve_map] == false
-        new(database.get(match['id']))
-      else
-        get(maps_to, database)
-      end
+      MapResolver.new(path, database, options).resolve
     end
   end
 
@@ -42,7 +62,7 @@ class Boombera::ContentItem < CouchRest::Document
 
   def referenced_by
     rows = @database.view('boombera/map_references', :key => path)['rows']
-    rows.map{ |r| r['value'] }.sort
+    rows.map{ |row| row['value'] }.sort
   end
 
   # :nodoc:
