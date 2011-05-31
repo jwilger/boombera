@@ -23,13 +23,13 @@ class Boombera
   end
 
   def put(path, body)
-    content_item = get(path) and content_item.body = body
+    content_item = get(path, :resolve_map => false) and content_item.body = body
     content_item ||= ContentItem.new(path, body, db)
     content_item.save
   end
 
-  def get(path)
-    ContentItem.get(path, db)
+  def get(path, options = {})
+    ContentItem.get(path, db, options)
   end
 
   def map(path, source_path)

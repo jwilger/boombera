@@ -40,7 +40,9 @@ describe Boombera do
   describe '#put' do
     context "to an existing path" do
       it 'updates and saves the existing content item' do
-        Boombera::ContentItem.should_receive(:get).with('/foo', db).and_return(content_item)
+        Boombera::ContentItem.should_receive(:get) \
+          .with('/foo', db, :resolve_map => false) \
+          .and_return(content_item)
         content_item.should_receive(:body=).with('bar')
         content_item.should_receive(:save).and_return(true)
         boombera.put('/foo', 'bar').should == true
@@ -62,7 +64,7 @@ describe Boombera do
   describe '#get' do
     it 'gets the content item at the specified path from the current database' do
       db.as_null_object
-      Boombera::ContentItem.should_receive(:get).with('/foo', db)
+      Boombera::ContentItem.should_receive(:get).with('/foo', db, {})
       boombera.get('/foo')
     end
   end
@@ -90,7 +92,7 @@ describe Boombera do
     context 'to an existing path' do
       before(:each) do
         Boombera::ContentItem.should_receive(:get) \
-          .with('/bar', db) \
+          .with('/bar', db, {}) \
           .and_return(content_item)
       end
 

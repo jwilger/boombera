@@ -1,10 +1,15 @@
 class Boombera::ContentItem < CouchRest::Document
   class << self
-    def get(path, database)
+    def get(path, database, options = {})
       rows = database.view('boombera/content_map', :key => path)['rows']
       return nil if rows.empty?
-      id = rows.first['id']
-      new(database.get(id))
+      match = rows.first
+      maps_to = match['value']
+      if maps_to == path || options[:resolve_map] == false
+        new(database.get(match['id']))
+      else
+        get(maps_to, database)
+      end
     end
   end
 
