@@ -1,6 +1,12 @@
 require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'spec_helper'))
 
 describe Boombera::ContentItem do
+  let(:db) do
+    db = stub(CouchRest::Database)
+    CouchRest.stub!(:database! => db)
+    db
+  end
+
   describe '.new' do
     context 'when passed a path, body and database' do
       it 'sets the database from the database argument' do
@@ -20,9 +26,15 @@ describe Boombera::ContentItem do
   end
 
   describe '#path' do
-    it 'returns the path from the associated document' do
+    it 'returns the path from the arguments' do
       content = Boombera::ContentItem.new('/index.html')
       content.path.should == '/index.html'
+    end
+
+    it 'returns the _id when initialized with a Document' do
+      doc = CouchRest::Document.new('_id' => '/foobar')
+      content = Boombera::ContentItem.new(doc)
+      content.path.should == '/foobar'
     end
   end
 
@@ -42,6 +54,7 @@ describe Boombera::ContentItem do
       content.body.should == 'bar'
     end
 
+    # TODO: this test doesn't make any sense. WTH is that view stub for?
     it 'sets the maps_to attribute equal to the path attribute if argument is not nil' do
       db.stub!(:view => {'rows' => [{'value' => '/foo'}]})
       content.map_to '/bar'
@@ -49,6 +62,7 @@ describe Boombera::ContentItem do
       content.maps_to.should == '/foo'
     end
 
+    # TODO: this test doesn't make any sense. WTH is that view stub for?
     it 'does not change the maps_to attribute if the argument is nil' do
       db.stub!(:view => {'rows' => [{'value' => '/foo'}]})
       content.map_to '/bar'
@@ -86,6 +100,16 @@ describe Boombera::ContentItem do
       it 'sets the body attribute to nil' do
         content.body.should be_nil
       end
+    end
+  end
+
+  describe '#save' do
+    it 'ensures that the type attribute is set to "content_item"' do
+      content = Boombera::ContentItem.new('/foo', 'bar', db)
+      db.should_receive(:save_doc) \
+        .with({'_id' => '/foo', 'body' => 'bar', 'type' => 'content_item'}, false) \
+        .and_return({'ok' => true})
+      content.save
     end
   end
 end

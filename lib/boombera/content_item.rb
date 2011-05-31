@@ -33,7 +33,8 @@ class Boombera::ContentItem < CouchRest::Document
   # The actual content that is being stored
   attr_accessor :body
 
-  # The path used to access the ContentItem
+  # The path used to access the ContentItem, it is stored as the '_id' attribute
+  # in CouchDB
   attr_reader :path
 
   attr_reader :maps_to #:nodoc:
@@ -45,7 +46,7 @@ class Boombera::ContentItem < CouchRest::Document
       super(doc_or_path)
     when String
       @database = database
-      super(:path => doc_or_path, :body => body)
+      super('_id' => doc_or_path, 'body' => body)
     else
       raise ArgumentError, "doc_or_path must either be an instance of CouchRest::Document or a String"
     end
@@ -58,7 +59,7 @@ class Boombera::ContentItem < CouchRest::Document
         "Tried to map #{path} to #{source_path}, but #{source_path} doesn't exist."
     else
       self.body = nil
-      self[:maps_to] = source_path
+      self['maps_to'] = source_path
     end
   end
 
@@ -68,20 +69,25 @@ class Boombera::ContentItem < CouchRest::Document
     rows.map{ |row| row['value'] }.sort
   end
 
+  def save(*args)
+    self['type'] = 'content_item'
+    super
+  end
+
   def path #:nodoc:
-    self[:path]
+    self['_id']
   end
 
   def body #:nodoc:
-    self[:body]
+    self['body']
   end
 
   def body=(new_body) #:nodoc:
-    self[:body] = new_body
-    self[:maps_to] = path unless new_body.nil?
+    self['body'] = new_body
+    self['maps_to'] = path unless new_body.nil?
   end
 
   def maps_to #:nodoc:
-    self[:maps_to]
+    self['maps_to']
   end
 end

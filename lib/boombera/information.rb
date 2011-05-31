@@ -17,11 +17,11 @@ module Boombera::Information #:nodoc: all
         'content_map' => {
           'map' => <<-EOF
             function(doc) {
-              if (doc['path']) {
+              if (doc['type'] && doc.type == 'content_item') {
                 if (doc['maps_to']) {
-                  emit(doc.path, doc.maps_to);
+                  emit(doc._id, doc.maps_to);
                 } else {
-                  emit(doc.path, doc.path);
+                  emit(doc._id, doc._id);
                 }
               }
             }
@@ -30,8 +30,8 @@ module Boombera::Information #:nodoc: all
         'map_references' => {
           'map' => <<-EOF
             function(doc) {
-              if(doc['maps_to'] && doc.maps_to != doc.path) {
-                emit(doc.maps_to, doc.path);
+              if(doc['maps_to'] && doc.maps_to != doc._id) {
+                emit(doc.maps_to, doc._id);
               }
             }
             EOF
