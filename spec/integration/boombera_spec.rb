@@ -93,10 +93,9 @@ describe 'The Boombera library:' do
     it 'creates a pointer from a path to another path' do
       boombera.put('/foo', 'foo bar baz')
       boombera.map('/bar', '/foo')
-      results = db.view('boombera/content_map', :key => '/bar')['rows']
-      results.length.should == 1
-      map_item = results.first
-      map_item['value'].should == '/foo'
+      result = boombera.get('/bar')
+      result.path.should == '/foo'
+      result.body.should == 'foo bar baz'
     end
 
     it 'updates a pointer from a path to another path' do
@@ -104,23 +103,18 @@ describe 'The Boombera library:' do
       boombera.put('/spam', 'ham spam can')
       boombera.map('/bar', '/foo')
       boombera.map('/bar', '/spam')
-      results = db.view('boombera/content_map', :key => '/bar')['rows']
-      results.length.should == 1
-      map_item = results.first
-      map_item['value'].should == '/spam'
+      result = boombera.get('/bar')
+      result.path.should == '/spam'
+      result.body.should == 'ham spam can'
     end
 
     it 'turns a content item into a pointer' do
       boombera.put('/foo', 'foo bar baz')
       boombera.put('/bar', 'some old bar content')
       boombera.map('/bar', '/foo')
-      results = db.view('boombera/content_map', :key => '/bar')['rows']
-      results.length.should == 1
-      map_item = results.first
-      map_item['value'].should == '/foo'
-      map_item['id'].should == '/bar'
-      doc = db.get('/bar')
-      doc['body'].should be_nil
+      result = boombera.get('/bar')
+      result.path.should == '/foo'
+      result.body.should == 'foo bar baz'
     end
   end
 

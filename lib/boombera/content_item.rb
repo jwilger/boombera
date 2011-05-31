@@ -10,23 +10,15 @@ class Boombera::ContentItem < CouchRest::Document
     end
 
     def resolve
-      id, maps_to = content_map
-      return if id.nil?
-      if @final_attempt || maps_to == @path
-        Boombera::ContentItem.new(@database.get(id))
+      doc = @database.get(@path)
+      if (doc['_id'] == doc['maps_to']) || @final_attempt
+        return Boombera::ContentItem.new(doc)
       else
-        @path = maps_to
+        @path = doc['maps_to']
         resolve
       end
-    end
-
-    private
-
-    def content_map
-      rows = @database.view('boombera/content_map', :key => @path)['rows']
-      return if rows.empty?
-      match = rows.first
-      [match['id'], match['value']]
+    rescue RestClient::ResourceNotFound
+      return nil
     end
   end
 
@@ -36,8 +28,6 @@ class Boombera::ContentItem < CouchRest::Document
   # The path used to access the ContentItem, it is stored as the '_id' attribute
   # in CouchDB
   attr_reader :path
-
-  attr_reader :maps_to #:nodoc:
 
   def initialize(doc_or_path, body = nil, database = nil) #:nodoc:
     case doc_or_path
@@ -53,7 +43,7 @@ class Boombera::ContentItem < CouchRest::Document
   end
 
   def map_to(source_path) #:nodoc:
-    rows = @database.view('boombera/content_map', :key => source_path)['rows']
+    rows = @database.view('boombera/content_paths', :key => source_path)['rows']
     if rows.empty?
       raise Boombera::InvalidMapping,
         "Tried to map #{path} to #{source_path}, but #{source_path} doesn't exist."
@@ -70,8 +60,14 @@ class Boombera::ContentItem < CouchRest::Document
   end
 
   def save(*args)
+    self['maps_to'] = maps_to
     self['type'] = 'content_item'
     super
+  end
+
+  def maps_to #:nodoc:
+    return path unless body.nil?
+    self['maps_to'] || path
   end
 
   def path #:nodoc:
@@ -84,10 +80,5 @@ class Boombera::ContentItem < CouchRest::Document
 
   def body=(new_body) #:nodoc:
     self['body'] = new_body
-    self['maps_to'] = path unless new_body.nil?
-  end
-
-  def maps_to #:nodoc:
-    self['maps_to']
   end
 end

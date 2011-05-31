@@ -14,7 +14,7 @@ module Boombera::Information #:nodoc: all
       'language' => 'javascript',
       'gem_version' => version,
       'views' => {
-        'content_map' => {
+        'content_paths' => {
           'map' => <<-EOF
             function(doc) {
               if (doc['type'] && doc.type == 'content_item') {

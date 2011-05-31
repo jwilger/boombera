@@ -4,11 +4,7 @@ describe Boombera::ContentItem::MapResolver do
   describe '#resolve' do
     context 'with an existing content item' do
       it 'returns a ContentItem instance for the found document' do
-        view_result = {'rows' => [{'id' => '/foo', 'value' => '/foo'}]}
         db = mock(CouchRest::Database)
-        db.should_receive(:view) \
-          .with('boombera/content_map', :key => '/foo') \
-          .and_return(view_result)
         db.should_receive(:get) \
           .with('/foo') \
           .and_return(:a_document)
@@ -20,26 +16,20 @@ describe Boombera::ContentItem::MapResolver do
 
     context 'with a non-existant content item' do
       it 'returns nil' do
-        view_result = {'rows' => []}
         db = mock(CouchRest::Database)
-        db.should_receive(:view) \
-          .with('boombera/content_map', :key => '/foo') \
-          .and_return(view_result)
+        db.should_receive(:get) \
+          .with('/foo') \
+          .and_raise(RestClient::ResourceNotFound)
         Boombera::ContentItem::MapResolver.new('/foo', db).resolve.should == nil
       end
     end
 
     context 'with a path that maps to another content item' do
       it 'returns the mapped content item' do
-        map_view_result = {'rows' => [{'id' => '/foo', 'value' => '/bar'}]}
-        content_view_result = {'rows' => [{'id' => '/bar', 'value' => '/bar'}]}
         db = mock(CouchRest::Database)
-        db.should_receive(:view) \
-          .with('boombera/content_map', :key => '/foo') \
-          .and_return(map_view_result)
-        db.should_receive(:view) \
-          .with('boombera/content_map', :key => '/bar') \
-          .and_return(content_view_result)
+        db.should_receive(:get) \
+          .with('/foo') \
+          .and_return({'_id' => '/foo', 'maps_to' => '/bar'})
         db.should_receive(:get) \
           .with('/bar') \
           .and_return(:a_document)
@@ -49,11 +39,7 @@ describe Boombera::ContentItem::MapResolver do
       end
 
       it 'returns the pointer content item when passed the :resolve_map option as false' do
-        map_view_result = {'rows' => [{'id' => '/foo', 'value' => '/bar'}]}
         db = mock(CouchRest::Database)
-        db.should_receive(:view) \
-          .with('boombera/content_map', :key => '/foo') \
-          .and_return(map_view_result)
         db.should_receive(:get) \
           .with('/foo') \
           .and_return(:a_document)
