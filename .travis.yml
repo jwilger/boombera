@@ -13,4 +13,4 @@ rvm:
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -qq couchdb -y
-  - /etc/init.d/couchdb start
+  - sudo /etc/init.d/couchdb start
