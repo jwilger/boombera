@@ -10,7 +10,5 @@ rvm:
   - jruby-head
   - 1.8.7
   - ree
-before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq couchdb -y
-  - sudo /etc/init.d/couchdb start
+services:
+  - couchdb
